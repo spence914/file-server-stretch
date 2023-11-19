@@ -1,5 +1,4 @@
 const net = require('net');
-const fs = require('fs');
 
 const HOST = 'localhost';
 const PORT = 4815;

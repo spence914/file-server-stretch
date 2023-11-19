@@ -2,7 +2,7 @@ const net = require('net');
 const fs = require('fs');
 
 const PORT = 4815;
-const filePath = './txt_files/';
+const directoryPath = './txt_files/';
 
 const server = net.createServer();
 
@@ -15,8 +15,8 @@ server.on('connection', connection => {
   connection.write('\n Hello and welcome to this simple file server \n Here are the available files \n type the name and extension as shown to receive the file');
 
 
-  // set a filesystem to grab from
-  fs.readdir(filePath, (err, files) => {
+  // Send names of all files to client
+  fs.readdir(directoryPath, (err, files) => {
     if (err) {
       console.error(err);
       connection.write('Error reading directory');
@@ -26,11 +26,20 @@ server.on('connection', connection => {
     connection.write(JSON.stringify(files));
   });
 
-  // client requests a file by filename
-  // server looks for requested files locally and sends back the data
-
+  // Server receives the string the client sends, appends it to the directory to get the file name
+  // reads that files contents out and sends that content to the connection
   connection.on('data', data => {
-    console.log(`Message from the client: ${data}`);
+    const filename = data.toString().trim();
+    const filePath = directoryPath + filename;
+
+    fs.readFile(filePath, (err, content) => {
+      if (err) {
+        connection.write('Error: File not found');
+        return;
+      }
+
+      connection.write(content);
+    });
   });
 });
 
